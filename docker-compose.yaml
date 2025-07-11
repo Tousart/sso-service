@@ -1,0 +1,36 @@
+services: 
+  sso:
+    ports:
+     - "44044:44044"
+    build:
+      context: ./sso
+      dockerfile: ./Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+  
+  postgres:
+    image: postgres:13.3
+    environment:
+      POSTGRES_DB: "auth_psql"
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "password"
+    ports:
+     - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U user -d auth_psql" ]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+  
+  migrate:
+    image: migrate/migrate
+    volumes:
+     - ./sso/repository/postgres/psql_migrations:/migrations
+    command:
+      [ "-path", "/migrations", "-database", "postgres://user:password@postgres:5432/auth_psql?sslmode=disable", "up" ]
+    depends_on:
+      postgres:
+        condition: service_healthy
