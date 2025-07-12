@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	ssov1 "github.com/tousart/protos/gen/go/sso"
@@ -61,7 +62,7 @@ func (s *serverAPI) Register(ctx context.Context, in *ssov1.RegisterRequest) (*e
 
 	err := s.auth.Register(ctx, in.GetLogin(), in.GetPassword(), in.GetEmail())
 	if err != nil {
-		return &emptypb.Empty{}, status.Error(codes.Internal, "failed to register user")
+		return &emptypb.Empty{}, status.Error(codes.Internal, fmt.Sprintf("failed to register user: %v", err))
 	}
 
 	// DELETE

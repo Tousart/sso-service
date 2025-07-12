@@ -3,12 +3,13 @@ package kafka
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/segmentio/kafka-go"
 )
 
 type KafkaSender struct {
-	writer *kafka.Writer
+	Writer *kafka.Writer
 }
 
 func NewKafkaSender(brokers []string, topicName string) *KafkaSender {
@@ -17,11 +18,12 @@ func NewKafkaSender(brokers []string, topicName string) *KafkaSender {
 		Topic:    topicName,
 		Balancer: &kafka.RoundRobin{},
 	})
-	return &KafkaSender{writer: writer}
+	return &KafkaSender{Writer: writer}
 }
 
 func (kw *KafkaSender) SendMessage(ctx context.Context, key, value []byte) error {
-	err := kw.writer.WriteMessages(ctx,
+	log.Printf("STRING: key: %s, value: %s", string(key), string(value))
+	err := kw.Writer.WriteMessages(ctx,
 		kafka.Message{
 			Key:   key,
 			Value: value,

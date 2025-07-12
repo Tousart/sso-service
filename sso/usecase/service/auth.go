@@ -18,8 +18,11 @@ type AuthService struct {
 	sender repository.Sender
 }
 
-func CreateAuthService(repo repository.AuthRepo) *AuthService {
-	return &AuthService{repo: repo}
+func CreateAuthService(repo repository.AuthRepo, sender repository.Sender) *AuthService {
+	return &AuthService{
+		repo:   repo,
+		sender: sender,
+	}
 }
 
 func (s *AuthService) Login(ctx context.Context, login string, password string) (token string, err error) {
@@ -51,7 +54,10 @@ func (s *AuthService) Register(ctx context.Context, login string, password strin
 		return fmt.Errorf("failed to insert user: %v", err)
 	}
 
-	var emailMessage models.EmailMessage
+	emailMessage := models.EmailMessage{
+		Login: login,
+		Email: email,
+	}
 
 	message, err := json.Marshal(emailMessage)
 	if err != nil {
