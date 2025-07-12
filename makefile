@@ -10,4 +10,4 @@ stop:
 	docker compose down
 
 restart: build
-	start
+	docker compose up

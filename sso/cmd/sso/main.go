@@ -11,6 +11,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/tousart/sso/config"
 	"github.com/tousart/sso/grpc_server/auth"
+	"github.com/tousart/sso/repository/kafka"
 	"github.com/tousart/sso/repository/postgres"
 	"github.com/tousart/sso/usecase/service"
 	"google.golang.org/grpc"
@@ -31,7 +32,10 @@ func main() {
 		log.Fatalf("failed to create repo: %v", err)
 	}
 
-	service := service.CreateAuthService(repo)
+	sender := kafka.NewKafkaSender([]string{"kafka:9092"}, "email_messages")
+	defer sender.Writer.Close()
+
+	service := service.CreateAuthService(repo, sender)
 
 	serverAPI := auth.CreateServerAPI(service)
 
@@ -45,10 +49,10 @@ func main() {
 	log.Println("grpc server has been created")
 
 	auth.Register(server, serverAPI)
-	fmt.Println("auth server has been registered")
+	log.Println("auth server has been registered")
 
 	reflection.Register(server)
-	fmt.Println("added reflection")
+	log.Println("added reflection")
 
 	if err := server.Serve(listener); err != nil {
 		log.Fatalf("failed to serve: %v", err)
