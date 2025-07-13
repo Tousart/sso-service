@@ -32,7 +32,7 @@ func main() {
 		log.Fatalf("failed to create repo: %v", err)
 	}
 
-	sender := kafka.NewKafkaSender([]string{"kafka:9092"}, "email_messages")
+	sender := kafka.NewKafkaSender([]string{"kafka:9093"}, "email_messages")
 	defer sender.Writer.Close()
 
 	service := service.CreateAuthService(repo, sender)

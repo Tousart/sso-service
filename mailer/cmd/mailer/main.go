@@ -19,7 +19,8 @@ func main() {
 
 	errorChan := make(chan error, 1)
 
-	recipient := rep.NewKafkaRecipient([]string{"kafka:9092"}, "email_messages", "mailers")
+	recipient := rep.NewKafkaRecipient([]string{"kafka:9093"}, "email_messages", "mailers")
+	log.Printf("recipient: %v", recipient)
 
 	wg := new(sync.WaitGroup)
 

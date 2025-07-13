@@ -16,19 +16,21 @@ func NewKafkaSender(brokers []string, topicName string) *KafkaSender {
 	writer := kafka.NewWriter(kafka.WriterConfig{
 		Brokers:  brokers,
 		Topic:    topicName,
-		Balancer: &kafka.RoundRobin{},
+		Balancer: &kafka.Hash{},
 	})
 	return &KafkaSender{Writer: writer}
 }
 
 func (kw *KafkaSender) SendMessage(ctx context.Context, key, value []byte) error {
-	log.Printf("STRING: key: %s, value: %s", string(key), string(value))
+	log.Printf("sending message: key: %s, value: %s", string(key), string(value))
 	err := kw.Writer.WriteMessages(ctx,
 		kafka.Message{
 			Key:   key,
 			Value: value,
 		},
 	)
+
+	log.Println("message has been sent")
 
 	if err != nil {
 		return fmt.Errorf("failed to write in topic: %v", err)

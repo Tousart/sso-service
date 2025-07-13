@@ -2,7 +2,6 @@ package kafka
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -26,7 +25,8 @@ func (w *Worker) Mail(ctx context.Context, wg *sync.WaitGroup, errorChan chan er
 			case <-ctx.Done():
 				return
 			default:
-				key, value, err := w.recipient.ReceiveMessage(ctx)
+				// ПЕРЕПРОВЕРИТЬ КОНТЕКСТ
+				key, value, err := w.recipient.ReceiveMessage(context.Background())
 				if err != nil {
 					log.Printf("receive error: %v\n", err)
 					errorChan <- err
@@ -46,9 +46,9 @@ func (w *Worker) Mail(ctx context.Context, wg *sync.WaitGroup, errorChan chan er
 
 func SendMessage(key, value string) error {
 	go func() {
-		fmt.Printf("Отправка письма... (key: %s, value: %s)\n", key, value)
+		log.Printf("Отправка письма... (key: %s, value: %s)\n", key, value)
 		time.Sleep(time.Second * 10)
-		fmt.Println("Письмо отправлено")
+		log.Println("Письмо отправлено")
 	}()
 	return nil
 }
