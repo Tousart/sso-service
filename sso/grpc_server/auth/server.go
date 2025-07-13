@@ -37,10 +37,9 @@ func (s *serverAPI) Login(ctx context.Context, in *ssov1.LoginRequest) (*ssov1.L
 
 	token, err := s.auth.Login(ctx, in.GetLogin(), in.GetPassword())
 	if err != nil {
-		return nil, status.Error(codes.Internal, "failed to login")
+		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to login: %v", err))
 	}
 
-	// DELETE
 	log.Println("successful login")
 	log.Printf("token: %s", token)
 
@@ -65,7 +64,6 @@ func (s *serverAPI) Register(ctx context.Context, in *ssov1.RegisterRequest) (*e
 		return &emptypb.Empty{}, status.Error(codes.Internal, fmt.Sprintf("failed to register user: %v", err))
 	}
 
-	// DELETE
 	log.Println("successful registration")
 
 	return &emptypb.Empty{}, nil

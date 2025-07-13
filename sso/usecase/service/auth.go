@@ -64,7 +64,7 @@ func (s *AuthService) Register(ctx context.Context, login string, password strin
 		return fmt.Errorf("failed to marshal message: %v", err)
 	}
 
-	err = s.sender.SendMessage(ctx, []byte("hello"), message)
+	err = s.sender.SendMessage(context.Background(), []byte("hello"), message)
 	if err != nil {
 		return fmt.Errorf("failed to send to broker: %v", err)
 	}
