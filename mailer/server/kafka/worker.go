@@ -18,14 +18,13 @@ func NewWorker(recipient repository.Recipient) *Worker {
 }
 
 func (w *Worker) Mail(ctx context.Context, wg *sync.WaitGroup, errorChan chan error) {
-	defer wg.Done()
 	go func() {
+		defer wg.Done()
 		for {
 			select {
 			case <-ctx.Done():
 				return
 			default:
-				// ПЕРЕПРОВЕРИТЬ КОНТЕКСТ
 				key, value, err := w.recipient.ReceiveMessage(context.Background())
 				if err != nil {
 					log.Printf("receive error: %v\n", err)
@@ -33,7 +32,8 @@ func (w *Worker) Mail(ctx context.Context, wg *sync.WaitGroup, errorChan chan er
 					return
 				}
 
-				err = SendMessage(key, value)
+				wg.Add(1)
+				err = SendMessage(key, value, wg)
 				if err != nil {
 					log.Printf("sending error: %v\n", err)
 					errorChan <- err
@@ -44,8 +44,9 @@ func (w *Worker) Mail(ctx context.Context, wg *sync.WaitGroup, errorChan chan er
 	}()
 }
 
-func SendMessage(key, value string) error {
+func SendMessage(key, value string, wg *sync.WaitGroup) error {
 	go func() {
+		defer wg.Done()
 		log.Printf("Отправка письма... (key: %s, value: %s)\n", key, value)
 		time.Sleep(time.Second * 10)
 		log.Println("Письмо отправлено")

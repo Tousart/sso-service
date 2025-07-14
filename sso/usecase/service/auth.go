@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -14,29 +15,35 @@ import (
 )
 
 type AuthService struct {
-	repo   repository.AuthRepo
-	sender repository.Sender
+	authRepo  repository.AuthRepo
+	tokenRepo repository.TokenRepo
+	sender    repository.Sender
 }
 
-func CreateAuthService(repo repository.AuthRepo, sender repository.Sender) *AuthService {
+func CreateAuthService(authRepo repository.AuthRepo, tokenRepo repository.TokenRepo, sender repository.Sender) *AuthService {
 	return &AuthService{
-		repo:   repo,
-		sender: sender,
+		authRepo:  authRepo,
+		tokenRepo: tokenRepo,
+		sender:    sender,
 	}
 }
 
 func (s *AuthService) Login(ctx context.Context, login string, password string) (token string, err error) {
-	userID, err := s.repo.Login(ctx, login, password)
+	userID, err := s.authRepo.Login(ctx, login, password)
 	if err != nil {
 		return "", fmt.Errorf("failed to get userID: %v", err)
 	}
 
-	token, err = generateToken(userID, login)
+	duration := time.Hour * 12
+
+	token, err = generateToken(userID, login, duration)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate token: %v", err)
 	}
 
-	// ОТПРАВКА ТОКЕНА В REDIS
+	if err = s.tokenRepo.SetToken(context.Background(), userID, token, duration); err != nil {
+		return "", fmt.Errorf("redis error (token has been deleted): %v", err)
+	}
 
 	return token, nil
 }
@@ -49,7 +56,7 @@ func (s *AuthService) Register(ctx context.Context, login string, password strin
 
 	userID := generateID()
 
-	err = s.repo.Register(ctx, login, hashPassword, email, userID)
+	err = s.authRepo.Register(ctx, login, hashPassword, email, userID)
 	if err != nil {
 		return fmt.Errorf("failed to insert user: %v", err)
 	}
@@ -85,14 +92,14 @@ func generateID() string {
 	return id
 }
 
-func generateToken(userID string, login string) (string, error) {
-	secretKey := ""
+func generateToken(userID string, login string, duration time.Duration) (string, error) {
+	secretKey := os.Getenv("SECRET_WORD_FOR_JWT")
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
 			"id":    userID,
 			"login": login,
-			"exp":   time.Now().Add(time.Hour * 12).Unix(),
+			"exp":   time.Now().Add(duration).Unix(),
 		})
 
 	signedToken, err := token.SignedString([]byte(secretKey))

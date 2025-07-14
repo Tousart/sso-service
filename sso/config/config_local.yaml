@@ -3,3 +3,10 @@
 grpc:  
   port: 44044  
   timeout: 1s
+postgres:
+  
+# redis:
+#   address: "redis:6379"
+#   default_password: "password"
+#   db_id: 1
+#   user: "user"
