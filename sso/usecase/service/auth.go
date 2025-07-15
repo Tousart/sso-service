@@ -93,7 +93,7 @@ func generateID() string {
 }
 
 func generateToken(userID string, login string, duration time.Duration) (string, error) {
-	secretKey := os.Getenv("SECRET_WORD_FOR_JWT")
+	secretKey := os.Getenv("JWT_SECRET")
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{

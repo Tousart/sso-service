@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/tousart/sso/config"
 	"github.com/tousart/sso/pkg"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -14,8 +15,8 @@ type AuthRepo struct {
 	db *sql.DB
 }
 
-func CreateAuthRepo() (*AuthRepo, error) {
-	db, err := pkg.ConnectToDB()
+func CreateAuthRepo(cfg *config.Config) (*AuthRepo, error) {
+	db, err := pkg.ConnectToDB(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create db: %v", err)
 	}

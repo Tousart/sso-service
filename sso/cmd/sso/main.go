@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	// "log/slog"
 	"net"
@@ -26,22 +27,24 @@ import (
 // )
 
 func main() {
-	cfg, err := config.MustLoad()
+	cfgPath := config.ParseFlags()
+	cfg, err := config.MustLoad(cfgPath)
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	authRepo, err := postgres.CreateAuthRepo()
+	authRepo, err := postgres.CreateAuthRepo(cfg)
 	if err != nil {
 		log.Fatalf("failed to create auth repo: %v", err)
 	}
 
-	tokenRepo, err := redis.NewTokenRepo()
+	tokenRepo, err := redis.NewTokenRepo(cfg)
 	if err != nil {
 		log.Fatalf("failed to create token repo: %v", err)
 	}
 
-	sender := kafka.NewKafkaSender([]string{"kafka:9093"}, "email_messages")
+	// sender := kafka.NewKafkaSender([]string{"kafka:9093"}, "email_messages")
+	sender := kafka.NewKafkaSender(strings.Split(cfg.Kafka.Brokers, ","), cfg.Kafka.TopicName)
 	defer sender.Writer.Close()
 
 	service := service.CreateAuthService(authRepo, tokenRepo, sender)
@@ -69,10 +72,6 @@ func main() {
 
 	// Логгер
 	// log := setupLogger(cfg.Env)
-
-	// Приложение
-
-	// Запуск gRPC-сервера
 }
 
 // func setupLogger(env string) *slog.Logger {
