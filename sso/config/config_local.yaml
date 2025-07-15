@@ -1,12 +1,24 @@
-# env: "local"
 # storage_path: "./storage/sso.db"  
 grpc:  
   port: 44044  
   timeout: 1s
+
 postgres:
+  psql_db: "auth_psql"
+  user: "user"
+  password: "password"
+  port: 5432
+  host: "postgres"
   
-# redis:
-#   address: "redis:6379"
-#   default_password: "password"
-#   db_id: 1
-#   user: "user"
+redis:
+  password: "password"
+  db_id: 1
+  host: "redis"
+  port: 6379
+
+kafka:
+  brokers: "kafka:9093"
+  topic_name: "email_messages"
+  group_id: "mailers"
+
+jwt_secret: "secret"

@@ -7,17 +7,18 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/tousart/sso/config"
 )
 
 type TokenRepo struct {
 	db *redis.Client
 }
 
-func NewTokenRepo() (*TokenRepo, error) {
+func NewTokenRepo(cfg *config.Config) (*TokenRepo, error) {
 	db := redis.NewClient(&redis.Options{
-		Addr:     "redis:6379",
-		Password: "password",
-		DB:       1,
+		Addr:     fmt.Sprintf("%s:%d", cfg.Redis.Host, cfg.Redis.Port),
+		Password: cfg.Redis.Password,
+		DB:       cfg.Redis.DB_ID,
 	})
 
 	if err := db.Ping(context.Background()).Err(); err != nil {

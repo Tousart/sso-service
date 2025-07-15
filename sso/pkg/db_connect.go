@@ -3,10 +3,21 @@ package pkg
 import (
 	"database/sql"
 	"fmt"
+	"log"
+
+	"github.com/tousart/sso/config"
 )
 
-func ConnectToDB() (*sql.DB, error) {
-	db, err := sql.Open("postgres", "postgres://user:password@postgres:5432/auth_psql?sslmode=disable")
+func ConnectToDB(cfg *config.Config) (*sql.DB, error) {
+	log.Printf("USER NAME: %s", cfg.Postgres.User)
+	address := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		cfg.Postgres.User,
+		cfg.Postgres.Password,
+		cfg.Postgres.Host,
+		cfg.Postgres.Port,
+		cfg.Postgres.DBName)
+
+	db, err := sql.Open("postgres", address)
 	if err != nil {
 		return nil, fmt.Errorf("db connection error: %v", err)
 	}

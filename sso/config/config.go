@@ -12,11 +12,15 @@ import (
 )
 
 type Config struct {
+	GRPC      GRPCConfig     `yaml:"grpc"`
+	Postgres  PostgresConfig `yaml:"postgres"`
+	Redis     RedisConfig    `yaml:"redis"`
+	Kafka     KafkaConfig    `yaml:"kafka"`
+	JWTSecret string         `yaml:"jwt_secret" env:"JWT_SECRET"`
+
+	// MigrationsPath string
 	// Env            string     `yaml:"env" env-default:"local"`
 	// StoragePath    string     `yaml:"storage_path" env-required:"true"`
-	GRPC           GRPCConfig `yaml:"grpc"`
-	MigrationsPath string
-	PSQL           Postgres `yaml:"psql"`
 	// TokenTTL       time.Duration `yaml:"token_ttl" env-default:"1h"`
 }
 
@@ -25,14 +29,28 @@ type GRPCConfig struct {
 	Timeout time.Duration `yaml:"timeout" env:"GRPC_TIMEOUT"`
 }
 
-type Postgres struct {
-	Host    string `yaml:"host" env:"PSQL_HOST"`
-	Port    int    `yaml:"port" env:"PSQL_PORT"`
-	DBName  string `yaml:"psql_name" env:"PSQL_NAME"`
-	SSLMode string `yaml:"sslmode" env:"PSQL_SSLMODE"`
+type PostgresConfig struct {
+	Host     string `yaml:"host" env:"POSTGRES_HOST"`
+	Port     int    `yaml:"port" env:"POSTGRES_PORT"`
+	DBName   string `yaml:"psql_db" env:"POSTGRES_DB"`
+	User     string `yaml:"user" env:"POSTGRES_USER"`
+	Password string `yaml:"password" env:"POSTGRES_PASSWORD"`
 }
 
-func parseFlags() string {
+type RedisConfig struct {
+	Host     string `yaml:"host" env:"REDIS_HOST"`
+	Port     int    `yaml:"port" env:"REDIS_PORT"`
+	Password string `yaml:"password" env:"REDIS_PASSWORD"`
+	DB_ID    int    `yaml:"db_id" env:"DB_ID"`
+}
+
+type KafkaConfig struct {
+	Brokers   string `yaml:"brokers" env:"KAFKA_BROKERS"`
+	TopicName string `yaml:"topic_name" env:"KAFKA_TOPIC"`
+	GroupID   string `yaml:"group_id" env:"KAFKA_GROUP"`
+}
+
+func ParseFlags() string {
 	cfgPathPtr := flag.String("config", "", "Path to cfg")
 	flag.Parse()
 
@@ -41,9 +59,7 @@ func parseFlags() string {
 	return cfgPath
 }
 
-func MustLoad() (*Config, error) {
-	cfgPath := parseFlags()
-
+func MustLoad(cfgPath string) (*Config, error) {
 	if cfgPath == "" {
 		return nil, errors.New("config path is empty")
 	}
@@ -58,7 +74,7 @@ func MustLoad() (*Config, error) {
 		return nil, fmt.Errorf("failed to read config: %v", err)
 	}
 
-	if err := cleanenv.ReadEnv(cfg); err != nil {
+	if err := cleanenv.ReadEnv(&cfg); err != nil {
 		return nil, fmt.Errorf("failed to read env file: %v", err)
 	}
 
