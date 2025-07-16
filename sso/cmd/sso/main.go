@@ -43,7 +43,6 @@ func main() {
 		log.Fatalf("failed to create token repo: %v", err)
 	}
 
-	// sender := kafka.NewKafkaSender([]string{"kafka:9093"}, "email_messages")
 	sender := kafka.NewKafkaSender(strings.Split(cfg.Kafka.Brokers, ","), cfg.Kafka.TopicName)
 	defer sender.Writer.Close()
 

@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 
@@ -19,8 +20,7 @@ func main() {
 
 	errorChan := make(chan error, 1)
 
-	recipient := rep.NewKafkaRecipient([]string{"kafka:9093"}, "email_messages", "mailers")
-	log.Printf("recipient: %v", recipient)
+	recipient := rep.NewKafkaRecipient(strings.Split(os.Getenv("KAFKA_BROKERS"), ","), os.Getenv("KAFKA_TOPIC"), os.Getenv("KAFKA_GROUP"))
 
 	wg := new(sync.WaitGroup)
 

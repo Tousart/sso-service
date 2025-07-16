@@ -15,12 +15,12 @@ type KafkaRecipient struct {
 
 func NewKafkaRecipient(brokers []string, topicName, groupID string) *KafkaRecipient {
 	reader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: brokers,
-		Topic:   topicName,
-		GroupID: groupID,
-		// StartOffset:           kafka.FirstOffset,
-		// MinBytes:              1,    // 1B
-		// MaxBytes:              10e6, // 10MB
+		Brokers:               brokers,
+		Topic:                 topicName,
+		GroupID:               groupID,
+		StartOffset:           kafka.FirstOffset,
+		MinBytes:              1,
+		MaxBytes:              10e6,
 		CommitInterval:        time.Second,
 		WatchPartitionChanges: true,
 	})
