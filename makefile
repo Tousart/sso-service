@@ -1,13 +1,16 @@
-.PHONY: build start stop restart
+.PHONY: build up down restart downv
 
 build:
 	docker compose build
 
-start:
+up:
 	docker compose up
 
-stop:
+down:
 	docker compose down
+
+downv:
+	docker compose down -v
 
 restart: build
 	docker compose up
