@@ -62,6 +62,7 @@ func main() {
 	auth.Register(server, serverAPI)
 	log.Println("auth server has been registered")
 
+	// on for tests, off for prod
 	reflection.Register(server)
 	log.Println("added reflection")
 
