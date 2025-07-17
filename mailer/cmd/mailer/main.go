@@ -28,7 +28,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	wg.Add(1)
-	worker.Mail(ctx, wg, errorChan)
+	worker.Mail(ctx, errorChan, wg)
 
 	defer func() {
 		cancel()
@@ -36,10 +36,13 @@ func main() {
 		recipient.Reader.Close()
 	}()
 
-	select {
-	case <-signalChan:
-		log.Print("graceful shutdown\n")
-	case err := <-errorChan:
-		log.Printf("worker error: %v", err)
+	for {
+		select {
+		case <-signalChan:
+			log.Print("graceful shutdown\n")
+			return
+		case err := <-errorChan:
+			log.Printf("worker error: %v", err)
+		}
 	}
 }

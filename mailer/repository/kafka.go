@@ -3,5 +3,5 @@ package repository
 import "context"
 
 type Recipient interface {
-	ReceiveMessage(ctx context.Context) (key, value string, err error)
+	ReceiveMessage(ctx context.Context) (key string, value []byte, err error)
 }

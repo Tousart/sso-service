@@ -30,7 +30,7 @@ func (kw *KafkaSender) SendMessage(ctx context.Context, key, value []byte) error
 		},
 	)
 
-	log.Println("message has been sent")
+	log.Println("message has been sent to broker")
 
 	if err != nil {
 		return fmt.Errorf("failed to write in topic: %v", err)

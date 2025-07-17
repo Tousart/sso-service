@@ -21,21 +21,22 @@ func NewKafkaRecipient(brokers []string, topicName, groupID string) *KafkaRecipi
 		StartOffset:           kafka.FirstOffset,
 		MinBytes:              1,
 		MaxBytes:              10e6,
+		MaxWait:               10 * time.Second,
 		CommitInterval:        time.Second,
 		WatchPartitionChanges: true,
 	})
 	return &KafkaRecipient{Reader: reader}
 }
 
-func (kr *KafkaRecipient) ReceiveMessage(ctx context.Context) (key, value string, err error) {
+func (kr *KafkaRecipient) ReceiveMessage(ctx context.Context) (key string, value []byte, err error) {
 	log.Println("reading message...")
 	message, err := kr.Reader.ReadMessage(ctx)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to read message: %v", err)
+		return "", nil, fmt.Errorf("failed to read message: %v", err)
 	}
 
 	key = string(message.Key)
-	value = string(message.Value)
-	log.Printf("message has been read: key: %s, value: %s\n", key, value)
+	value = message.Value
+	log.Printf("message has been read: key: %s, value: %s\n", key, string(value))
 	return key, value, nil
 }
